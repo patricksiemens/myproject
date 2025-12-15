@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { AuthContext } from "./authContext";
 import type { Role } from "./authContext";
+import { getMe } from "../services/userService";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
@@ -14,10 +15,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    localStorage.setItem("isAuthenticated", String(isAuthenticated));
-    if (role) localStorage.setItem("role", role);
-    else localStorage.removeItem("role");
-  }, [isAuthenticated, role]);
+    const loadUser = async () => {
+      try {
+        const user = await getMe();
+        setIsAuthenticated(true);
+        setRole(user.role);
+      } catch {
+        setIsAuthenticated(false);
+        setRole(null);
+      }
+    };
+
+    loadUser();
+  }, []);
 
   const login = (userRole: Role) => {
     setIsAuthenticated(true);
