@@ -1,12 +1,10 @@
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
-import { AuthContext } from "./authContext";
-import type { Role } from "./authContext";
-import { getMe } from "../services/userService";
+import { useState } from "react";
+import { AuthContext, type Role } from "./authContext";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem("isAuthenticated") === "true";
+    return localStorage.getItem("token") !== null;
   });
 
   const [role, setRole] = useState<Role | null>(() => {
@@ -14,27 +12,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return r === "admin" || r === "user" ? (r as Role) : null;
   });
 
-  useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const user = await getMe();
-        setIsAuthenticated(true);
-        setRole(user.role);
-      } catch {
-        setIsAuthenticated(false);
-        setRole(null);
-      }
-    };
-
-    loadUser();
-  }, []);
-
-  const login = (userRole: Role) => {
+  const login = (userRole: Role, token: string) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("role", userRole);
     setIsAuthenticated(true);
     setRole(userRole);
   };
 
   const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
     setIsAuthenticated(false);
     setRole(null);
   };
