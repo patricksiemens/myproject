@@ -5,6 +5,7 @@ export type Role = "admin" | "user";
 export type AuthContextType = {
   isAuthenticated: boolean;
   role: Role | null;
+  loading: boolean;
   login: (role: Role, token: string) => void;
   logout: () => void;
 };

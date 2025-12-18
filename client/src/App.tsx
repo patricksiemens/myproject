@@ -3,9 +3,10 @@ import Login from "./pages/Login.tsx";
 import Register from "./pages/Register.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import PrivateRoute from "./components/PrivateRoute.tsx";
-import AdminPanel from "./pages/AdminPanel.tsx";
+import AdminPanel from "./pages/admin/AdminPanel.tsx";
 import MainLayout from "./layouts/MainLayout.tsx";
 import AuthProvider from "./context/AuthProvider.tsx";
+import ProductsAdmin from "./pages/admin/ProductsAdmin.tsx";
 
 export default function App() {
   return (
@@ -30,6 +31,16 @@ export default function App() {
               <PrivateRoute requiredRole="admin">
                 <MainLayout>
                   <AdminPanel />
+                </MainLayout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/products"
+            element={
+              <PrivateRoute requiredRole="admin">
+                <MainLayout>
+                  <ProductsAdmin />
                 </MainLayout>
               </PrivateRoute>
             }

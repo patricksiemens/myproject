@@ -34,12 +34,21 @@ export default function MainLayout({ children }: MainLayoutProps) {
               </Link>
 
               {role === "admin" && (
-                <Link
-                  to="/admin"
-                  className="px-4 py-2 rounded hover:bg-gray-700"
-                >
-                  Admin Panel
-                </Link>
+                <>
+                  <Link
+                    to="/admin"
+                    className="px-4 py-2 rounded hover:bg-gray-700"
+                  >
+                    Admin Panel
+                  </Link>
+
+                  <Link
+                    to="/admin/products"
+                    className="px-4 py-2 rounded hover:bg-gray-700"
+                  >
+                    Products
+                  </Link>
+                </>
               )}
 
               <button
