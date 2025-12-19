@@ -15,6 +15,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
+import { Query, DefaultValuePipe } from '@nestjs/common';
 
 @Controller('products')
 export class ProductsController {
@@ -22,8 +23,19 @@ export class ProductsController {
 
   // 🔓 Público (tienda)
   @Get()
-  findAll() {
-    return this.productsService.findAll();
+  findAll(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit: number,
+    @Query('search') search?: string,
+    @Query('category') category?: string,
+  ) {
+    return this.productsService.findAll({ page, limit, search, category });
+  }
+  // 🔓 Público – todas las categorías activas
+  @Get('categories')
+  async getCategories() {
+    const categories = await this.productsService.getAllCategories();
+    return categories; // devuelve array de strings
   }
 
   // 🔓 Público

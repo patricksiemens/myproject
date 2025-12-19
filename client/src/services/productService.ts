@@ -6,7 +6,24 @@ import type {
 } from "../types/product";
 
 // Obtener productos (público)
-export const getProducts = () => api.get<Product[]>("/products");
+export const getProducts = async (
+  page = 1,
+  limit = 5,
+  search?: string,
+  category?: string
+) => {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+  if (search) params.append("search", search);
+  if (category) params.append("category", category);
+
+  return api.get(`/products?${params.toString()}`);
+};
+
+// Obtener todas las categorías (para filtro)
+export const getAllCategories = () => api.get<string[]>("/products/categories");
 
 // Obtener un producto
 export const getProductById = (id: number) =>

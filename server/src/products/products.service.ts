@@ -5,6 +5,13 @@ import { Product } from './product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
+interface PaginationOptions {
+  page: number;
+  limit: number;
+  search?: string;
+  category?: string;
+}
+
 @Injectable()
 export class ProductsService {
   constructor(
@@ -17,11 +24,45 @@ export class ProductsService {
     return this.productRepository.save(product);
   }
 
-  findAll() {
-    return this.productRepository.find({
-      where: { isActive: true },
-      order: { createdAt: 'DESC' },
-    });
+  async findAll({ page, limit, search, category }: PaginationOptions) {
+    const query = this.productRepository
+      .createQueryBuilder('product')
+      .where('product.isActive = :isActive', { isActive: true });
+
+    if (search) {
+      query.andWhere('LOWER(product.name) LIKE :search', {
+        search: `%${search.toLowerCase()}%`,
+      });
+    }
+
+    if (category) {
+      query.andWhere('product.category = :category', { category });
+    }
+
+    query
+      .orderBy('product.createdAt', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    const [data, total] = await query.getManyAndCount();
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async getAllCategories(): Promise<string[]> {
+    const categories = await this.productRepository
+      .createQueryBuilder('product')
+      .select('DISTINCT product.category', 'category')
+      .where('product.isActive = :isActive', { isActive: true })
+      .getRawMany<{ category: string }>();
+
+    return categories.map((c) => c.category); // extraemos solo el string
   }
 
   async findOne(id: number) {
