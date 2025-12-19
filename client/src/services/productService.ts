@@ -22,6 +22,15 @@ export const getProducts = async (
   return api.get(`/products?${params.toString()}`);
 };
 
+export const uploadProductImage = (file: File) => {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  return api.post<{ imageUrl: string }>("/products/upload", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};
+
 // Obtener todas las categorías (para filtro)
 export const getAllCategories = () => api.get<string[]>("/products/categories");
 

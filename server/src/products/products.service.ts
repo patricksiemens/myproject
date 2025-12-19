@@ -20,6 +20,8 @@ export class ProductsService {
   ) {}
 
   create(dto: CreateProductDto) {
+    console.log('DTO recibido:', dto);
+
     const product = this.productRepository.create(dto);
     return this.productRepository.save(product);
   }

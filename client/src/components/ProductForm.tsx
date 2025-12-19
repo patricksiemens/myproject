@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import type { Product, CreateProductPayload } from "../types/product";
-import { createProduct, updateProduct } from "../services/productService";
+import {
+  createProduct,
+  updateProduct,
+  uploadProductImage,
+} from "../services/productService";
 import Toast from "./Toast";
 import { useToast } from "../hooks/useToast";
 
@@ -28,6 +32,7 @@ export default function ProductForm({
   const [form, setForm] = useState<CreateProductPayload>(emptyForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast, showToast, hideToast } = useToast();
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   // 🔹 Solo para modo EDIT
   useEffect(() => {
@@ -42,10 +47,15 @@ export default function ProductForm({
       imageUrl: product.imageUrl ?? "",
       isActive: product.isActive,
     });
+
+    if (product.imageUrl) {
+      setPreviewUrl(`http://localhost:3001${product.imageUrl}`);
+    }
   }, [product]);
 
   const resetForm = () => {
     setForm(emptyForm);
+    setPreviewUrl(null);
   };
 
   const handleChange = (
@@ -57,6 +67,24 @@ export default function ProductForm({
       ...prev,
       [name]: name === "price" || name === "stock" ? Number(value) : value,
     }));
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setPreviewUrl(URL.createObjectURL(file));
+
+    try {
+      setIsSubmitting(true);
+      const res = await uploadProductImage(file);
+      setForm((prev) => ({
+        ...prev,
+        imageUrl: res.data.imageUrl,
+      }));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -144,13 +172,32 @@ export default function ProductForm({
           disabled={isSubmitting}
         />
 
+        {/* Input de archivo */}
         <input
-          name="imageUrl"
-          placeholder="Image URL"
-          value={form.imageUrl}
-          onChange={handleChange}
+          type="file"
+          name="image"
+          accept="image/*"
+          onChange={handleImageChange}
           disabled={isSubmitting}
         />
+
+        {/* Preview de imagen */}
+        {previewUrl && (
+          <div style={{ marginTop: 10 }}>
+            <p>Preview:</p>
+            <img
+              src={previewUrl}
+              alt="Preview"
+              style={{
+                width: 120,
+                height: 120,
+                objectFit: "cover",
+                borderRadius: 8,
+                border: "1px solid #ccc",
+              }}
+            />
+          </div>
+        )}
 
         <div style={{ marginTop: 10 }}>
           <button type="submit" disabled={isSubmitting}>
